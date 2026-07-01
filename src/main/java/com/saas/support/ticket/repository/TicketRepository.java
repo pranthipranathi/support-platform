@@ -23,4 +23,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     long countByStatus(TicketStatus status);
 
     long countByAssignedTo(UUID agentId);
+    long countByPriority(TicketPriority priority);
+
+    long countBySlaBreached(boolean slaBreached);
 }
