@@ -22,6 +22,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
+    @org.springframework.cache.annotation.Cacheable(value = "customers")
     public List<CustomerResponse> getAllCustomers() {
         return customerRepository.findAll()
                 .stream()

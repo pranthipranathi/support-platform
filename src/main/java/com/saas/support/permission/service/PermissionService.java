@@ -17,6 +17,7 @@ public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
+    @org.springframework.cache.annotation.Cacheable(value = "permissions")
     public List<PermissionResponse> getAllPermissions() {
         return permissionRepository.findAll()
                 .stream()
