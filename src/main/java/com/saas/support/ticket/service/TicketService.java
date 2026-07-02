@@ -2,6 +2,9 @@ package com.saas.support.ticket.service;
 
 import com.saas.support.common.enums.TicketStatus;
 import com.saas.support.common.exception.ResourceNotFoundException;
+import com.saas.support.kafka.event.TicketCreatedEvent;
+import com.saas.support.kafka.event.TicketUpdatedEvent;
+import com.saas.support.kafka.producer.TicketEventProducer;
 import com.saas.support.ticket.dto.CreateTicketRequest;
 import com.saas.support.ticket.dto.TicketResponse;
 import com.saas.support.ticket.dto.UpdateTicketRequest;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final TicketEventProducer ticketEventProducer;
 
     public List<TicketResponse> getAllTickets() {
         return ticketRepository.findAll()
@@ -68,6 +72,17 @@ public class TicketService {
 
         Ticket saved = ticketRepository.save(ticket);
         log.info("Ticket created: {}", saved.getId());
+
+        ticketEventProducer.publishTicketCreated(TicketCreatedEvent.builder()
+                .ticketId(saved.getId())
+                .subject(saved.getSubject())
+                .priority(saved.getPriority().name())
+                .status(saved.getStatus().name())
+                .customerId(saved.getCustomerId())
+                .assignedTo(saved.getAssignedTo())
+                .createdAt(saved.getCreatedAt())
+                .build());
+
         return mapToResponse(saved);
     }
 
@@ -75,6 +90,8 @@ public class TicketService {
     public TicketResponse updateTicket(UUID id, UpdateTicketRequest request) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket", id.toString()));
+
+        String oldStatus = ticket.getStatus().name();
 
         if (request.getSubject() != null) ticket.setSubject(request.getSubject());
         if (request.getDescription() != null) ticket.setDescription(request.getDescription());
@@ -94,6 +111,17 @@ public class TicketService {
 
         Ticket updated = ticketRepository.save(ticket);
         log.info("Ticket updated: {}", updated.getId());
+
+        ticketEventProducer.publishTicketUpdated(TicketUpdatedEvent.builder()
+                .ticketId(updated.getId())
+                .subject(updated.getSubject())
+                .oldStatus(oldStatus)
+                .newStatus(updated.getStatus().name())
+                .priority(updated.getPriority().name())
+                .assignedTo(updated.getAssignedTo())
+                .updatedAt(updated.getUpdatedAt())
+                .build());
+
         return mapToResponse(updated);
     }
 
