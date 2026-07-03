@@ -62,7 +62,7 @@ application:
       refresh-token-expiration: 604800000
 
 ai:
-  provider: openai
+  provider: mock
   openai:
     api-key: ${OPENAI_API_KEY:}
     model: gpt-4o
