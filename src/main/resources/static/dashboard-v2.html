@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Support Platform</title>
+  <style>
+    :root {
+      --bg: #F4F4F0;
+      --surface: #FFFFFF;
+      --border: #E2E0D8;
+      --border-strong: #C8C5B8;
+      --text-primary: #1A1A18;
+      --text-secondary: #5C5A52;
+      --text-muted: #9A9890;
+      --accent: #2B6351;
+      --accent-light: #DFF0EA;
+      --accent-text: #1A3D30;
+      --danger: #B03A1A;
+      --danger-light: #FAEAE4;
+      --warning: #8A5E0A;
+      --warning-light: #FDF3D8;
+      --success: #2D6B1A;
+      --success-light: #E4F2DC;
+      --radius: 10px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --sidebar-width: 230px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+
+    /* ===== Login ===== */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #1A3D30 0%, #2B6351 100%);
+    }
+    .login-card {
+      width: 380px; background: var(--surface); border-radius: 16px;
+      padding: 2.5rem 2.25rem; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .login-logo {
+      width: 44px; height: 44px; border-radius: 12px; background: var(--accent);
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px; margin-bottom: 1.5rem;
+    }
+    .login-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .login-card .sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.75rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+    .field input {
+      width: 100%; height: 42px; border: 1.5px solid var(--border-strong);
+      border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: var(--font);
+      background: var(--surface); outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .btn-primary {
+      width: 100%; height: 44px; background: var(--accent); color: white; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; font-family: var(--font);
+      cursor: pointer; transition: opacity 0.15s; margin-top: 0.5rem;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .error-box {
+      background: var(--danger-light); color: var(--danger); font-size: 13px;
+      padding: 10px 12px; border-radius: 8px; margin-bottom: 1rem; display: none;
+    }
+    .login-hint { font-size: 12px; color: var(--text-muted); margin-top: 1rem; text-align: center; }
+
+    /* ===== App Shell ===== */
+    #appShell { display: none; min-height: 100vh; }
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width); background: var(--surface);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-header { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 8px; background: var(--accent);
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .brand-name { font-weight: 700; font-size: 15px; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); }
+
+    .nav-section { padding: 0.75rem 0.75rem 0; }
+    .nav-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 0 0.5rem; margin-bottom: 4px; }
+    .nav-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; border-radius: 8px; cursor: pointer; margin-bottom: 2px;
+      font-size: 13.5px; color: var(--text-secondary); border: none; background: none;
+      font-family: var(--font); width: 100%; text-align: left; transition: all 0.12s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent-text); font-weight: 600; }
+    .nav-item .icon { font-size: 16px; margin-right: 8px; }
+    .nav-item .badge {
+      font-size: 10px; background: var(--bg); color: var(--text-muted);
+      border-radius: 10px; padding: 1px 6px; font-weight: 500;
+    }
+    .nav-item.active .badge { background: rgba(255,255,255,0.6); color: var(--accent-text); }
+
+    .sidebar-footer { margin-top: auto; padding: 1rem; border-top: 1px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light);
+      color: var(--accent-text); font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-email { font-size: 11px; color: var(--text-muted); }
+    .btn-logout {
+      width: 100%; background: none; border: 1px solid var(--border-strong);
+      border-radius: 7px; padding: 7px; font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; font-family: var(--font); transition: all 0.12s;
+    }
+    .btn-logout:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+
+    /* Main content */
+    .main { margin-left: var(--sidebar-width); flex: 1; padding: 2rem 2.5rem; max-width: calc(100vw - var(--sidebar-width)); }
+    .page-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+
+    /* Stats grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+    .stat-value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Cards / list */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .card-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .item-list { display: flex; flex-direction: column; }
+    .item-row {
+      display: flex; align-items: center; padding: 12px 16px;
+      border-bottom: 1px solid var(--border); gap: 12px; transition: background 0.1s;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: var(--bg); }
+    .item-icon {
+      width: 36px; height: 36px; border-radius: 8px; background: var(--accent-light);
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .item-body { flex: 1; min-width: 0; }
+    .item-title { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .item-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .empty { padding: 2.5rem; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+    /* Badges */
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .badge-open { background: var(--accent-light); color: var(--accent-text); }
+    .badge-progress { background: var(--warning-light); color: var(--warning); }
+    .badge-resolved { background: var(--success-light); color: var(--success); }
+    .badge-closed { background: var(--bg); color: var(--text-muted); }
+    .badge-high, .badge-urgent, .badge-critical { background: var(--danger-light); color: var(--danger); }
+    .badge-medium { background: var(--warning-light); color: var(--warning); }
+    .badge-low { background: var(--bg); color: var(--text-secondary); }
+    .badge-draft { background: var(--bg); color: var(--text-muted); }
+    .badge-published { background: var(--success-light); color: var(--success); }
+    .badge-active { background: var(--success-light); color: var(--success); }
+    .badge-unread { background: var(--danger-light); color: var(--danger); }
+    .badge-read { background: var(--bg); color: var(--text-muted); }
+
+    /* Buttons */
+    .btn { height: 36px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: var(--font); cursor: pointer; padding: 0 14px; border: none; transition: all 0.12s; }
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-accent:hover { opacity: 0.9; }
+    .btn-outline { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border-strong); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-sm { height: 30px; font-size: 12px; padding: 0 10px; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(26,26,24,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: 440px; max-height: 85vh; overflow-y: auto;
+      background: var(--surface); border-radius: 14px; padding: 1.75rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 1.25rem; }
+    .modal .field { margin-bottom: 1rem; }
+    .modal .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+    .modal .field input, .modal .field select, .modal .field textarea {
+      width: 100%; border: 1.5px solid var(--border-strong); border-radius: 8px;
+      padding: 9px 12px; font-size: 14px; font-family: var(--font);
+      background: var(--surface); outline: none; transition: border-color 0.15s; height: 40px;
+    }
+    .modal .field textarea { height: 90px; resize: vertical; }
+    .modal .field input:focus, .modal .field select:focus, .modal .field textarea:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.5rem; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text-primary); color: white; font-size: 13px;
+      padding: 11px 16px; border-radius: 9px; opacity: 0;
+      transform: translateY(8px); transition: all 0.2s; z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    .loading { padding: 2.5rem; text-align: center; color: var(--text-muted); font-size: 13px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">SP</div>
+    <h1>Support Platform</h1>
+    <p class="sub">Sign in to your admin dashboard</p>
+    <div class="error-box" id="loginError"></div>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="loginEmail" value="admin@test.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" value="Test@123">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    <p class="login-hint">Connects to your backend at localhost:8080</p>
+  </div>
+</div>
+
+<!-- App -->
+<div id="appShell">
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-mark">SP</div>
+          <div>
+            <div class="brand-name">Support Platform</div>
+            <div class="brand-sub">Admin Dashboard</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <button class="nav-item active" onclick="showView('dashboard')">
+          <span><span class="icon">📊</span>Dashboard</span>
+        </button>
+        <button class="nav-item" onclick="showView('reports')">
+          <span><span class="icon">📈</span>Reports</span>
+        </button>
+        <button class="nav-item" onclick="showView('admin')">
+          <span><span class="icon">⚙️</span>Admin Stats</span>
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Support</div>
+        <button class="nav-item" onclick="showView('tickets')">
+          <span><span class="icon">🎫</span>Tickets</span>
+          <span class="badge" id="navTickets">0</span>
+        </button>
+        <button class="nav-item" onclick="showView('comments')">
+          <span><span class="icon">💬</span>Comments</span>
+        </button>
+        <button class="nav-item" onclick="showView('knowledge')">
+          <span><span class="icon">📚</span>Knowledge Base</span>
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">People</div>
+        <button class="nav-item" onclick="showView('customers')">
+          <span><span class="icon">👥</span>Customers</span>
+          <span class="badge" id="navCustomers">0</span>
+        </button>
+        <button class="nav-item" onclick="showView('agents')">
+          <span><span class="icon">🎧</span>Agents</span>
+          <span class="badge" id="navAgents">0</span>
+        </button>
+        <button class="nav-item" onclick="showView('users')">
+          <span><span class="icon">👤</span>Users</span>
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <button class="nav-item" onclick="showView('roles')">
+          <span><span class="icon">🔐</span>Roles</span>
+        </button>
+        <button class="nav-item" onclick="showView('permissions')">
+          <span><span class="icon">🔑</span>Permissions</span>
+        </button>
+        <button class="nav-item" onclick="showView('notifications')">
+          <span><span class="icon">🔔</span>Notifications</span>
+        </button>
+        <button class="nav-item" onclick="showView('ai')">
+          <span><span class="icon">🤖</span>AI Assistant</span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar" id="userAvatar">A</div>
+          <div>
+            <div class="user-name" id="userName">Admin</div>
+            <div class="user-email" id="userEmail">admin@test.com</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- Dashboard -->
+      <div id="view-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub">Live overview of your support platform</div>
+          </div>
+          <button class="btn btn-outline" onclick="loadAll()">↻ Refresh</button>
+        </div>
+        <div class="stats-grid" id="dashStats"><div class="loading">Loading stats…</div></div>
+        <div class="two-col" style="margin-top:16px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Recent Tickets</span></div>
+            <div class="item-list" id="dashTickets"><div class="loading">Loading…</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Recent Customers</span></div>
+            <div class="item-list" id="dashCustomers"><div class="loading">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tickets -->
+      <div id="view-tickets" style="display:none;">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Tickets</div>
+            <div class="page-sub">Manage all support tickets</div>
+          </div>
+          <button class="btn btn-accent" onclick="openModal('ticket')">+ New Ticket</button>
+        </div>
+        <div class="card">
+          <div class="item-list" id="ticketList"><div class="loading">Loading tickets…</div></div>
+        </div>
+      </div>
+
+      <!-- Customers -->
+      <div id="view-customers" style="display:none;">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Customers</div>
+            <div class="page-sub">All customers in the system</div>
+          </div>
+          <button class="btn btn-accent" onclick="openModal('customer')">+ New Customer</button>
+        </div>
+        <div class="card">
+          <div class="item-list" id="customerList"><div class="loading">Loading customers…</div></div>
+        </div>
+      </div>
+
+      <!-- Agents -->
+      <div id="view-agents" style="display:none;">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Support Agents</div>
+            <div class="page-sub">Your support team members</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="item-list" id="agentList"><div class="loading">Loading agents…</div></div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="view-users" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Users</div><div class="page-sub">All registered users</div></div>
+        </div>
+        <div class="card">
+          <div class="item-list" id="userList"><div class="loading">Loading users…</div></div>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div id="view-comments" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Comments</div><div class="page-sub">Search ticket comments by ticket ID</div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px; padding:16px;">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="commentTicketId" placeholder="Paste ticket ID here..." style="flex:1; height:38px; border:1.5px solid var(--border-strong); border-radius:8px; padding:0 12px; font-family:var(--font); font-size:13px; outline:none;">
+            <button class="btn btn-accent" onclick="loadComments()">Load Comments</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="item-list" id="commentList"><div class="empty">Enter a ticket ID above to view comments</div></div>
+        </div>
+      </div>
+
+      <!-- Knowledge Base -->
+      <div id="view-knowledge" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Knowledge Base</div><div class="page-sub">Articles and guides</div></div>
+          <button class="btn btn-accent" onclick="openModal('article')">+ New Article</button>
+        </div>
+        <div class="card">
+          <div class="item-list" id="articleList"><div class="loading">Loading articles…</div></div>
+        </div>
+      </div>
+
+      <!-- Roles -->
+      <div id="view-roles" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Roles</div><div class="page-sub">User roles and access levels</div></div>
+        </div>
+        <div class="card">
+          <div class="item-list" id="roleList"><div class="loading">Loading roles…</div></div>
+        </div>
+      </div>
+
+      <!-- Permissions -->
+      <div id="view-permissions" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Permissions</div><div class="page-sub">System permissions</div></div>
+        </div>
+        <div class="card">
+          <div class="item-list" id="permissionList"><div class="loading">Loading permissions…</div></div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div id="view-notifications" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Notifications</div><div class="page-sub">Your notifications</div></div>
+          <button class="btn btn-outline" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div class="card">
+          <div class="item-list" id="notificationList"><div class="loading">Loading notifications…</div></div>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div id="view-reports" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Reports</div><div class="page-sub">Ticket analytics</div></div>
+        </div>
+        <div class="stats-grid" id="reportStats"><div class="loading">Loading report…</div></div>
+      </div>
+
+      <!-- Admin -->
+      <div id="view-admin" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">Admin Stats</div><div class="page-sub">System-wide statistics</div></div>
+        </div>
+        <div class="stats-grid" id="adminStats"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- AI -->
+      <div id="view-ai" style="display:none;">
+        <div class="page-header">
+          <div><div class="page-title">AI Assistant</div><div class="page-sub">AI-powered ticket analysis</div></div>
+        </div>
+        <div class="card" style="padding:20px; margin-bottom:16px;">
+          <div class="field" style="margin-bottom:12px;">
+            <label style="font-size:13px; font-weight:500; color:var(--text-secondary); display:block; margin-bottom:6px;">Ticket ID to analyze</label>
+            <input type="text" id="aiTicketId" placeholder="Paste ticket ID here..." style="width:100%; height:40px; border:1.5px solid var(--border-strong); border-radius:8px; padding:0 12px; font-family:var(--font); font-size:13px; outline:none;">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-accent" onclick="aiAnalyze()">🤖 Analyze Ticket</button>
+            <button class="btn btn-outline" onclick="aiSummarize()">📝 Summarize</button>
+          </div>
+        </div>
+        <div class="card" id="aiResult" style="padding:20px; display:none;">
+          <div id="aiResultContent"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-backdrop" id="modal-ticket">
+  <div class="modal">
+    <h3>Create New Ticket</h3>
+    <div class="field"><label>Subject</label><input type="text" id="tSubject" placeholder="Brief description of the issue"></div>
+    <div class="field"><label>Description</label><textarea id="tDescription" placeholder="Full details of the issue"></textarea></div>
+    <div class="field"><label>Priority</label>
+      <select id="tPriority">
+        <option value="LOW">Low</option><option value="MEDIUM" selected>Medium</option>
+        <option value="HIGH">High</option><option value="URGENT">Urgent</option><option value="CRITICAL">Critical</option>
+      </select>
+    </div>
+    <div class="field"><label>Customer</label><select id="tCustomer"></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('ticket')">Cancel</button>
+      <button class="btn btn-accent" onclick="submitTicket()">Create Ticket</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-customer">
+  <div class="modal">
+    <h3>Add New Customer</h3>
+    <div class="field"><label>Email</label><input type="email" id="cEmail" placeholder="customer@company.com"></div>
+    <div class="field"><label>First Name</label><input type="text" id="cFirstName" placeholder="Jane"></div>
+    <div class="field"><label>Last Name</label><input type="text" id="cLastName" placeholder="Smith"></div>
+    <div class="field"><label>Company</label><input type="text" id="cCompany" placeholder="Acme Corp"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('customer')">Cancel</button>
+      <button class="btn btn-accent" onclick="submitCustomer()">Add Customer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-article">
+  <div class="modal">
+    <h3>Create KB Article</h3>
+    <div class="field"><label>Title</label><input type="text" id="aTitle" placeholder="Article title"></div>
+    <div class="field"><label>Content</label><textarea id="aContent" placeholder="Article content..." style="height:120px;"></textarea></div>
+    <div class="field"><label>Excerpt</label><input type="text" id="aExcerpt" placeholder="Short summary"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('article')">Cancel</button>
+      <button class="btn btn-accent" onclick="submitArticle()">Create Article</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080/api/v1';
+  let token = null, currentUser = null;
+  let tickets = [], customers = [], agents = [], users = [], roles = [], permissions = [], articles = [], notifications = [];
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (type || '');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function api(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({'Content-Type':'application/json'}, token ? {'Authorization':'Bearer '+token} : {}, opts.headers||{});
+    const res = await fetch(API + path, opts);
+    let body = null;
+    try { body = await res.json(); } catch(e) {}
+    if (!res.ok) throw new Error((body&&body.message)||'Request failed ('+res.status+')');
+    return body;
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'none';
+    try {
+      const r = await api('/auth/login', {method:'POST', body:JSON.stringify({email,password})});
+      token = r.data.accessToken;
+      currentUser = r.data;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').style.display = 'block';
+      document.getElementById('userName').textContent = r.data.firstName + ' ' + r.data.lastName;
+      document.getElementById('userEmail').textContent = r.data.email;
+      document.getElementById('userAvatar').textContent = (r.data.firstName||'A')[0].toUpperCase();
+      loadAll();
+    } catch(e) {
+      errBox.textContent = e.message.includes('fetch') ? "Can't reach backend at localhost:8080. Make sure it's running." : e.message;
+      errBox.style.display = 'block';
+    }
+  }
+
+  function doLogout() {
+    token = null;
+    document.getElementById('appShell').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  function showView(name) {
+    document.querySelectorAll('.main > div').forEach(d => d.style.display = 'none');
+    document.getElementById('view-'+name).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active'); });
+    if(name==='tickets') renderTickets();
+    if(name==='customers') renderCustomers();
+    if(name==='agents') renderAgents();
+    if(name==='users') loadUsers();
+    if(name==='roles') loadRoles();
+    if(name==='permissions') loadPermissions();
+    if(name==='notifications') loadNotifications();
+    if(name==='knowledge') loadArticles();
+    if(name==='reports') loadReport();
+    if(name==='admin') loadAdminStats();
+    if(name==='dashboard') renderDashboard();
+  }
+
+  async function loadAll() {
+    await Promise.all([loadTickets(), loadCustomers(), loadAgents()]);
+    renderDashboard();
+  }
+
+  async function loadTickets() {
+    try { const r = await api('/tickets'); tickets = r.data||[]; document.getElementById('navTickets').textContent = tickets.length; } catch(e) {}
+  }
+  async function loadCustomers() {
+    try { const r = await api('/customers'); customers = r.data||[]; document.getElementById('navCustomers').textContent = customers.length; populateCustomerSelect(); } catch(e) {}
+  }
+  async function loadAgents() {
+    try { const r = await api('/agents'); agents = r.data||[]; document.getElementById('navAgents').textContent = agents.length; } catch(e) {}
+  }
+  async function loadUsers() {
+    try { const r = await api('/users'); users = r.data||[]; renderUsers(); } catch(e) {}
+  }
+  async function loadRoles() {
+    try { const r = await api('/roles'); roles = r.data||[]; renderRoles(); } catch(e) {}
+  }
+  async function loadPermissions() {
+    try { const r = await api('/permissions'); permissions = r.data||[]; renderPermissions(); } catch(e) {}
+  }
+  async function loadNotifications() {
+    try { const r = await api('/notifications'); notifications = r.data||[]; renderNotifications(); } catch(e) {}
+  }
+  async function loadArticles() {
+    try { const r = await api('/knowledge/all'); articles = r.data||[]; renderArticles(); } catch(e) {}
+  }
+  async function loadReport() {
+    try {
+      const r = await api('/reports/tickets');
+      const d = r.data;
+      const items = [
+        {label:'Total Tickets', value:d.totalTickets},
+        {label:'Open', value:d.openTickets},
+        {label:'In Progress', value:d.inProgressTickets},
+        {label:'Resolved', value:d.resolvedTickets},
+        {label:'Closed', value:d.closedTickets},
+        {label:'High Priority', value:d.highPriorityTickets},
+        {label:'Urgent', value:d.urgentTickets},
+        {label:'Critical', value:d.criticalTickets}
+      ];
+      document.getElementById('reportStats').innerHTML = items.map(i => `<div class="stat-card"><div class="stat-label">${i.label}</div><div class="stat-value">${i.value}</div></div>`).join('');
+    } catch(e) { document.getElementById('reportStats').innerHTML = '<div class="empty">Failed to load report</div>'; }
+  }
+  async function loadAdminStats() {
+    try {
+      const r = await api('/admin/stats');
+      const d = r.data;
+      const items = [
+        {label:'Total Users', value:d.totalUsers},
+        {label:'Total Tickets', value:d.totalTickets},
+        {label:'Total Customers', value:d.totalCustomers},
+        {label:'Total Agents', value:d.totalAgents},
+        {label:'Roles', value:d.totalRoles},
+        {label:'Permissions', value:d.totalPermissions},
+        {label:'KB Articles', value:d.totalKbArticles},
+        {label:'Notifications', value:d.totalNotifications}
+      ];
+      document.getElementById('adminStats').innerHTML = items.map(i => `<div class="stat-card"><div class="stat-label">${i.label}</div><div class="stat-value">${i.value}</div></div>`).join('');
+    } catch(e) {}
+  }
+
+  function renderDashboard() {
+    const open = tickets.filter(t=>t.status==='OPEN').length;
+    const progress = tickets.filter(t=>t.status==='IN_PROGRESS'||t.status==='WAITING').length;
+    const resolved = tickets.filter(t=>t.status==='RESOLVED'||t.status==='CLOSED').length;
+    document.getElementById('dashStats').innerHTML = [
+      {label:'Total Tickets', value:tickets.length, sub:'All time'},
+      {label:'Open', value:open, sub:'Needs attention'},
+      {label:'In Progress', value:progress, sub:'Being worked on'},
+      {label:'Resolved', value:resolved, sub:'Completed'}
+    ].map(s=>`<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`).join('');
+
+    document.getElementById('dashTickets').innerHTML = tickets.length === 0
+            ? '<div class="empty">No tickets yet</div>'
+            : tickets.slice(-5).reverse().map(t=>`
+      <div class="item-row">
+        <div class="item-icon">🎫</div>
+        <div class="item-body">
+          <div class="item-title">${esc(t.subject)}</div>
+          <div class="item-sub">${fmtStatus(t.status)} · ${fmtPriority(t.priority)}</div>
+        </div>
+        <div class="item-right">
+          <span class="badge badge-${(t.status||'').toLowerCase().replace('_','-')}">${fmtStatus(t.status)}</span>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('dashCustomers').innerHTML = customers.length === 0
+            ? '<div class="empty">No customers yet</div>'
+            : customers.slice(-5).reverse().map(c=>`
+      <div class="item-row">
+        <div class="item-icon">👤</div>
+        <div class="item-body">
+          <div class="item-title">${esc(c.firstName+' '+c.lastName)}</div>
+          <div class="item-sub">${esc(c.email)}${c.company?' · '+esc(c.company):''}</div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>`).join('');
+  }
+
+  function renderTickets() {
+    document.getElementById('ticketList').innerHTML = tickets.length === 0
+            ? '<div class="empty">No tickets yet. Create your first one!</div>'
+            : tickets.slice().reverse().map(t=>`
+      <div class="item-row">
+        <div class="item-icon">🎫</div>
+        <div class="item-body">
+          <div class="item-title">${esc(t.subject)}</div>
+          <div class="item-sub">${esc((t.description||'').slice(0,60))}${t.description&&t.description.length>60?'…':''}</div>
+        </div>
+        <div class="item-right">
+          <span class="badge badge-${(t.priority||'low').toLowerCase()}">${fmtPriority(t.priority)}</span>
+          <span class="badge badge-${(t.status||'open').toLowerCase().replace('_','-')}">${fmtStatus(t.status)}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderCustomers() {
+    document.getElementById('customerList').innerHTML = customers.length === 0
+            ? '<div class="empty">No customers yet.</div>'
+            : customers.slice().reverse().map(c=>`
+      <div class="item-row">
+        <div class="item-icon">👥</div>
+        <div class="item-body">
+          <div class="item-title">${esc(c.firstName+' '+c.lastName)}</div>
+          <div class="item-sub">${esc(c.email)}${c.company?' · '+esc(c.company):''}</div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>`).join('');
+  }
+
+  function renderAgents() {
+    document.getElementById('agentList').innerHTML = agents.length === 0
+            ? '<div class="empty">No agents yet.</div>'
+            : agents.slice().reverse().map(a=>`
+      <div class="item-row">
+        <div class="item-icon">🎧</div>
+        <div class="item-body">
+          <div class="item-title">${esc(a.department||'General Support')}</div>
+          <div class="item-sub">Max ${a.maxTickets} tickets</div>
+        </div>
+        <span class="badge badge-${a.available?'active':'closed'}">${a.available?'Available':'Unavailable'}</span>
+      </div>`).join('');
+  }
+
+  function renderUsers() {
+    document.getElementById('userList').innerHTML = users.length === 0
+            ? '<div class="empty">No users found.</div>'
+            : users.map(u=>`
+      <div class="item-row">
+        <div class="item-icon">👤</div>
+        <div class="item-body">
+          <div class="item-title">${esc(u.firstName+' '+u.lastName)}</div>
+          <div class="item-sub">${esc(u.email)}</div>
+        </div>
+        <span class="badge badge-${u.active?'active':'closed'}">${u.active?'Active':'Inactive'}</span>
+      </div>`).join('');
+  }
+
+  function renderRoles() {
+    document.getElementById('roleList').innerHTML = roles.length === 0
+            ? '<div class="empty">No roles found.</div>'
+            : roles.map(r=>`
+      <div class="item-row">
+        <div class="item-icon">🔐</div>
+        <div class="item-body">
+          <div class="item-title">${esc(r.displayName)}</div>
+          <div class="item-sub">${esc(r.name)}${r.description?' · '+esc(r.description):''}</div>
+        </div>
+        <span class="badge badge-${r.system?'published':'draft'}">${r.system?'System':'Custom'}</span>
+      </div>`).join('');
+  }
+
+  function renderPermissions() {
+    document.getElementById('permissionList').innerHTML = permissions.length === 0
+            ? '<div class="empty">No permissions found.</div>'
+            : permissions.map(p=>`
+      <div class="item-row">
+        <div class="item-icon">🔑</div>
+        <div class="item-body">
+          <div class="item-title">${esc(p.name)}</div>
+          <div class="item-sub">${esc(p.resource)} · ${esc(p.action)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderNotifications() {
+    document.getElementById('notificationList').innerHTML = notifications.length === 0
+            ? '<div class="empty">No notifications yet.</div>'
+            : notifications.map(n=>`
+      <div class="item-row">
+        <div class="item-icon">🔔</div>
+        <div class="item-body">
+          <div class="item-title">${esc(n.title)}</div>
+          <div class="item-sub">${esc(n.message)}</div>
+        </div>
+        <span class="badge badge-${n.read?'read':'unread'}">${n.read?'Read':'Unread'}</span>
+      </div>`).join('');
+  }
+
+  function renderArticles() {
+    document.getElementById('articleList').innerHTML = articles.length === 0
+            ? '<div class="empty">No articles yet. Create your first one!</div>'
+            : articles.map(a=>`
+      <div class="item-row">
+        <div class="item-icon">📄</div>
+        <div class="item-body">
+          <div class="item-title">${esc(a.title)}</div>
+          <div class="item-sub">${esc((a.excerpt||a.content||'').slice(0,60))}…</div>
+        </div>
+        <div class="item-right">
+          <span class="badge badge-${(a.status||'draft').toLowerCase()}">${a.status||'DRAFT'}</span>
+          ${a.status==='DRAFT'?`<button class="btn btn-outline btn-sm" onclick="publishArticle('${a.id}')">Publish</button>`:''}
+        </div>
+      </div>`).join('');
+  }
+
+  async function loadComments() {
+    const id = document.getElementById('commentTicketId').value.trim();
+    if (!id) { showToast('Enter a ticket ID', 'error'); return; }
+    try {
+      const r = await api('/comments/ticket/'+id);
+      const comments = r.data||[];
+      document.getElementById('commentList').innerHTML = comments.length === 0
+              ? '<div class="empty">No comments on this ticket yet.</div>'
+              : comments.map(c=>`
+        <div class="item-row">
+          <div class="item-icon">💬</div>
+          <div class="item-body">
+            <div class="item-title">${esc(c.content)}</div>
+            <div class="item-sub">${c.internal?'Internal note':'Public reply'}</div>
+          </div>
+          <span class="badge badge-${c.internal?'draft':'active'}">${c.internal?'Internal':'Public'}</span>
+        </div>`).join('');
+    } catch(e) { showToast('Failed: '+e.message, 'error'); }
+  }
+
+  async function markAllRead() {
+    try {
+      await api('/notifications/read-all', {method:'PATCH'});
+      showToast('All marked as read', 'success');
+      loadNotifications();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function aiAnalyze() {
+    const id = document.getElementById('aiTicketId').value.trim();
+    if (!id) { showToast('Enter a ticket ID', 'error'); return; }
+    try {
+      const r = await api('/ai/tickets/'+id+'/analyze');
+      const d = r.data;
+      document.getElementById('aiResultContent').innerHTML = `
+      <div style="margin-bottom:12px;"><strong>Summary</strong><p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">${esc(d.summary)}</p></div>
+      <div style="margin-bottom:12px;"><strong>Suggested Reply</strong><p style="margin-top:4px;font-size:13px;color:var(--text-secondary);">${esc(d.suggestedReply)}</p></div>
+      <div style="display:flex;gap:12px;">
+        <div><strong>Sentiment</strong><br><span class="badge badge-active" style="margin-top:4px;display:inline-block;">${esc(d.sentiment)}</span></div>
+        <div><strong>Priority</strong><br><span class="badge badge-medium" style="margin-top:4px;display:inline-block;">${esc(d.suggestedPriority)}</span></div>
+        <div><strong>Category</strong><br><span class="badge badge-draft" style="margin-top:4px;display:inline-block;">${esc(d.category)}</span></div>
+      </div>`;
+      document.getElementById('aiResult').style.display = 'block';
+    } catch(e) { showToast('Failed: '+e.message, 'error'); }
+  }
+
+  async function aiSummarize() {
+    const id = document.getElementById('aiTicketId').value.trim();
+    if (!id) { showToast('Enter a ticket ID', 'error'); return; }
+    try {
+      const r = await api('/ai/tickets/'+id+'/summarize', {method:'POST'});
+      document.getElementById('aiResultContent').innerHTML = `<div><strong>AI Summary</strong><p style="margin-top:8px;font-size:13px;color:var(--text-secondary);">${esc(r.data)}</p></div>`;
+      document.getElementById('aiResult').style.display = 'block';
+      showToast('Summary saved to ticket', 'success');
+    } catch(e) { showToast('Failed: '+e.message, 'error'); }
+  }
+
+  function populateCustomerSelect() {
+    const sel = document.getElementById('tCustomer');
+    sel.innerHTML = customers.length === 0
+            ? '<option>No customers — add one first</option>'
+            : customers.map(c=>`<option value="${c.id}">${esc(c.firstName+' '+c.lastName)} (${esc(c.email)})</option>`).join('');
+  }
+
+  function openModal(name) { document.getElementById('modal-'+name).classList.add('show'); }
+  function closeModal(name) { document.getElementById('modal-'+name).classList.remove('show'); }
+
+  async function submitTicket() {
+    const subject = document.getElementById('tSubject').value.trim();
+    const description = document.getElementById('tDescription').value.trim();
+    const priority = document.getElementById('tPriority').value;
+    const customerId = document.getElementById('tCustomer').value;
+    if (!subject || !description || !customerId) { showToast('Fill in all required fields', 'error'); return; }
+    try {
+      await api('/tickets', {method:'POST', body:JSON.stringify({subject,description,priority,customerId})});
+      closeModal('ticket');
+      document.getElementById('tSubject').value='';
+      document.getElementById('tDescription').value='';
+      showToast('Ticket created!', 'success');
+      await loadTickets();
+      renderTickets();
+      renderDashboard();
+      showView('tickets');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function submitCustomer() {
+    const email = document.getElementById('cEmail').value.trim();
+    const firstName = document.getElementById('cFirstName').value.trim();
+    const lastName = document.getElementById('cLastName').value.trim();
+    const company = document.getElementById('cCompany').value.trim();
+    if (!email || !firstName || !lastName) { showToast('Fill in required fields', 'error'); return; }
+    try {
+      await api('/customers', {method:'POST', body:JSON.stringify({email,firstName,lastName,company})});
+      closeModal('customer');
+      document.getElementById('cEmail').value='';
+      document.getElementById('cFirstName').value='';
+      document.getElementById('cLastName').value='';
+      document.getElementById('cCompany').value='';
+      showToast('Customer added!', 'success');
+      await loadCustomers();
+      renderCustomers();
+      showView('customers');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function submitArticle() {
+    const title = document.getElementById('aTitle').value.trim();
+    const content = document.getElementById('aContent').value.trim();
+    const excerpt = document.getElementById('aExcerpt').value.trim();
+    if (!title || !content) { showToast('Fill in title and content', 'error'); return; }
+    try {
+      await api('/knowledge', {method:'POST', body:JSON.stringify({title,content,excerpt})});
+      closeModal('article');
+      document.getElementById('aTitle').value='';
+      document.getElementById('aContent').value='';
+      document.getElementById('aExcerpt').value='';
+      showToast('Article created!', 'success');
+      await loadArticles();
+      showView('knowledge');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function publishArticle(id) {
+    try {
+      await api('/knowledge/'+id+'/publish', {method:'PATCH'});
+      showToast('Article published!', 'success');
+      await loadArticles();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function fmtStatus(s) { return (s||'').replace('_',' ').toLowerCase().replace(/^\w/,c=>c.toUpperCase()); }
+  function fmtPriority(p) { return (p||'').toLowerCase().replace(/^\w/,c=>c.toUpperCase()); }
+  function esc(s) { if(!s) return ''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+</script>
+</body>
+</html>

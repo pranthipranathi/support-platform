@@ -22,7 +22,6 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    @org.springframework.cache.annotation.Cacheable(value = "roles")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll()
                 .stream()

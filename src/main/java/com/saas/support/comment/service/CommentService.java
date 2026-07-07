@@ -59,8 +59,8 @@ public class CommentService {
         response.setAuthorId(comment.getAuthorId());
         response.setContent(comment.getContent());
         response.setInternal(comment.isInternal());
-        response.setCreatedAt(comment.getCreatedAt());
-        response.setUpdatedAt(comment.getUpdatedAt());
+        response.setCreatedAt(comment.getCreatedAt() != null ? comment.getCreatedAt() : java.time.LocalDateTime.now());
+        response.setUpdatedAt(comment.getUpdatedAt() != null ? comment.getUpdatedAt() : java.time.LocalDateTime.now());
         return response;
     }
 }

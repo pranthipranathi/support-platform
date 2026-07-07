@@ -150,8 +150,8 @@ public class TicketService {
         response.setDueDate(ticket.getDueDate());
         response.setResolvedAt(ticket.getResolvedAt());
         response.setClosedAt(ticket.getClosedAt());
-        response.setCreatedAt(ticket.getCreatedAt());
-        response.setUpdatedAt(ticket.getUpdatedAt());
+        response.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt() : java.time.LocalDateTime.now());
+        response.setUpdatedAt(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt() : java.time.LocalDateTime.now());
         return response;
     }
 }

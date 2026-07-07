@@ -31,6 +31,12 @@ public class KbArticleController {
         return ResponseEntity.ok(ApiResponse.success(articleService.getAllPublished()));
     }
 
+    @GetMapping("/all")
+    @Operation(summary = "Get all articles including drafts")
+    public ResponseEntity<ApiResponse<List<ArticleResponse>>> getAllArticles() {
+        return ResponseEntity.ok(ApiResponse.success(articleService.getAllArticles()));
+    }
+
     @GetMapping("/search")
     @Operation(summary = "Search articles by keyword")
     public ResponseEntity<ApiResponse<List<ArticleResponse>>> search(

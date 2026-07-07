@@ -22,7 +22,6 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    @org.springframework.cache.annotation.Cacheable(value = "customers")
     public List<CustomerResponse> getAllCustomers() {
         return customerRepository.findAll()
                 .stream()
@@ -73,8 +72,8 @@ public class CustomerService {
         response.setPhone(customer.getPhone());
         response.setCompany(customer.getCompany());
         response.setActive(customer.isActive());
-        response.setCreatedAt(customer.getCreatedAt());
-        response.setUpdatedAt(customer.getUpdatedAt());
+        response.setCreatedAt(customer.getCreatedAt() != null ? customer.getCreatedAt() : java.time.LocalDateTime.now());
+        response.setUpdatedAt(customer.getUpdatedAt() != null ? customer.getUpdatedAt() : java.time.LocalDateTime.now());
         return response;
     }
 }

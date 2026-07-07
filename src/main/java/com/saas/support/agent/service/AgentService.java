@@ -68,8 +68,8 @@ public class AgentService {
         response.setDepartment(agent.getDepartment());
         response.setMaxTickets(agent.getMaxTickets());
         response.setAvailable(agent.isAvailable());
-        response.setCreatedAt(agent.getCreatedAt());
-        response.setUpdatedAt(agent.getUpdatedAt());
+        response.setCreatedAt(agent.getCreatedAt() != null ? agent.getCreatedAt() : java.time.LocalDateTime.now());
+        response.setUpdatedAt(agent.getUpdatedAt() != null ? agent.getUpdatedAt() : java.time.LocalDateTime.now());
         return response;
     }
 }

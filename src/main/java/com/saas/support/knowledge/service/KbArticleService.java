@@ -27,6 +27,11 @@ public class KbArticleService {
                 .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    public List<ArticleResponse> getAllArticles() {
+        return articleRepository.findAll()
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
     public List<ArticleResponse> search(String keyword) {
         return articleRepository.findByTitleContainingIgnoreCase(keyword)
                 .stream().map(this::mapToResponse).collect(Collectors.toList());

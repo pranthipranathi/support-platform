@@ -82,3 +82,9 @@ logging:
     com.saas.support: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{tenantId}] %-5level %logger{36} - %msg%n"
+
+    spring:
+      web:
+        resources:
+          static-locations: classpath:/static/
+          add-mappings: true
