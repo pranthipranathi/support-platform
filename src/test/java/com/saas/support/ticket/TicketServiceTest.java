@@ -60,13 +60,14 @@ class TicketServiceTest {
 
     @Test
     void getAllTickets_returnsAllTickets() {
-        when(ticketRepository.findAll()).thenReturn(List.of(ticket));
+        when(ticketRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(ticket)));
 
-        List<TicketResponse> result = ticketService.getAllTickets();
+        var result = ticketService.getAllTickets(0, 10);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getSubject()).isEqualTo("Test ticket");
-        verify(ticketRepository).findAll();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getSubject()).isEqualTo("Test ticket");
+
     }
 
     @Test

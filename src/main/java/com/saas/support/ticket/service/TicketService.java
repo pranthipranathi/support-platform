@@ -1,4 +1,5 @@
 package com.saas.support.ticket.service;
+import org.springframework.data.domain.Pageable;
 
 import com.saas.support.common.enums.TicketStatus;
 import com.saas.support.common.exception.ResourceNotFoundException;
@@ -19,6 +20,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.saas.support.common.response.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @Slf4j
 @Service
@@ -28,11 +33,24 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketEventProducer ticketEventProducer;
 
-    public List<TicketResponse> getAllTickets() {
-        return ticketRepository.findAll()
+    public PageResponse<TicketResponse> getAllTickets(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Ticket> ticketPage = ticketRepository.findAll(pageable);
+
+        List<TicketResponse> content = ticketPage.getContent()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+
+        return PageResponse.<TicketResponse>builder()
+                .content(content)
+                .page(ticketPage.getNumber())
+                .size(ticketPage.getSize())
+                .totalElements(ticketPage.getTotalElements())
+                .totalPages(ticketPage.getTotalPages())
+                .last(ticketPage.isLast())
+                .first(ticketPage.isFirst())
+                .build();
     }
 
     public TicketResponse getTicketById(UUID id) {

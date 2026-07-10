@@ -1,6 +1,7 @@
 package com.saas.support.ticket.controller;
 
 import com.saas.support.common.response.ApiResponse;
+import com.saas.support.common.response.PageResponse;
 import com.saas.support.ticket.dto.CreateTicketRequest;
 import com.saas.support.ticket.dto.TicketResponse;
 import com.saas.support.ticket.dto.UpdateTicketRequest;
@@ -25,10 +26,12 @@ public class TicketController {
     private final TicketService ticketService;
 
     @GetMapping
-    @Operation(summary = "Get all tickets")
-    public ResponseEntity<ApiResponse<List<TicketResponse>>> getAllTickets() {
+    @Operation(summary = "Get all tickets with pagination")
+    public ResponseEntity<ApiResponse<PageResponse<TicketResponse>>> getAllTickets(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
-                ApiResponse.success(ticketService.getAllTickets()));
+                ApiResponse.success(ticketService.getAllTickets(page, size)));
     }
 
     @GetMapping("/{id}")
