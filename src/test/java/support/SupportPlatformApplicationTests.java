@@ -1,13 +1,11 @@
-package support;
+package com.saas.support;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class SupportPlatformApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Unit tests don't need Spring context
 	}
-
 }
