@@ -1,11 +1,12 @@
 package com.saas.support.ticket.service;
-import org.springframework.data.domain.Pageable;
 
 import com.saas.support.common.enums.TicketStatus;
 import com.saas.support.common.exception.ResourceNotFoundException;
+import com.saas.support.common.response.PageResponse;
 import com.saas.support.kafka.event.TicketCreatedEvent;
 import com.saas.support.kafka.event.TicketUpdatedEvent;
 import com.saas.support.kafka.producer.TicketEventProducer;
+import com.saas.support.notification.service.EmailService;
 import com.saas.support.ticket.dto.CreateTicketRequest;
 import com.saas.support.ticket.dto.TicketResponse;
 import com.saas.support.ticket.dto.UpdateTicketRequest;
@@ -13,17 +14,18 @@ import com.saas.support.ticket.entity.Ticket;
 import com.saas.support.ticket.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import com.saas.support.common.response.PageResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 @Slf4j
 @Service
@@ -32,6 +34,7 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final TicketEventProducer ticketEventProducer;
+    private final Optional<EmailService> emailService;
 
     public PageResponse<TicketResponse> getAllTickets(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -101,6 +104,13 @@ public class TicketService {
                 .createdAt(saved.getCreatedAt())
                 .build());
 
+        emailService.ifPresent(e -> e.sendTicketCreatedEmail(
+                "customer@example.com",
+                "Customer",
+                saved.getSubject(),
+                saved.getId().toString()
+        ));
+
         return mapToResponse(saved);
     }
 
@@ -140,6 +150,15 @@ public class TicketService {
                 .updatedAt(updated.getUpdatedAt())
                 .build());
 
+        if (request.getStatus() == TicketStatus.RESOLVED) {
+            emailService.ifPresent(e -> e.sendTicketResolvedEmail(
+                    "customer@example.com",
+                    "Customer",
+                    updated.getSubject(),
+                    updated.getId().toString()
+            ));
+        }
+
         return mapToResponse(updated);
     }
 
@@ -168,8 +187,8 @@ public class TicketService {
         response.setDueDate(ticket.getDueDate());
         response.setResolvedAt(ticket.getResolvedAt());
         response.setClosedAt(ticket.getClosedAt());
-        response.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt() : java.time.LocalDateTime.now());
-        response.setUpdatedAt(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt() : java.time.LocalDateTime.now());
+        response.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt() : LocalDateTime.now());
+        response.setUpdatedAt(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt() : LocalDateTime.now());
         return response;
     }
 }
