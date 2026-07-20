@@ -51,8 +51,38 @@ spring:
       max-file-size: 10MB
       max-request-size: 20MB
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+
 server:
   port: 8080
+
+management:
+  health:
+    mail:
+      enabled: false
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
 
 application:
   security:
@@ -70,6 +100,11 @@ ai:
     max-tokens: 2000
     temperature: 0.7
 
+app:
+  mail:
+    from: ${MAIL_USERNAME:noreply@support.com}
+    from-name: Support Platform
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -82,31 +117,3 @@ logging:
     com.saas.support: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{tenantId}] %-5level %logger{36} - %msg%n"
-
-    spring:
-      web:
-        resources:
-          static-locations: classpath:/static/
-          add-mappings: true
-
-  spring:
-    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: ${MAIL_USERNAME:your-email@gmail.com}
-      password: ${MAIL_PASSWORD:your-app-password}
-      properties:
-        mail:
-          smtp:
-            auth: true
-            starttls:
-              enable: true
-              required: true
-    spring:
-      autoconfigure:
-        exclude: org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
-
-  app:
-    mail:
-      from: ${MAIL_USERNAME:your-email@gmail.com}
-      from-name: Support Platform
